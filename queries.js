@@ -1,5 +1,3 @@
-
-
 var promise = require('bluebird');
 
 var options = {
@@ -17,7 +15,7 @@ console.log(connectionstring);
 var pgp = require('pg-promise')(options);
 var db = pgp(connectionstring);
 
-function getAllAnimals(req,res,next) {
+function getAllAnimals(req, res, next) {
     db.any('select * from animal, clinic')
         .then((data) => {
             res.status(200)
@@ -25,6 +23,39 @@ function getAllAnimals(req,res,next) {
                     status: 'success',
                     data: data,
                     message: 'Retrieved ALL animals'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function getSingleAnimal(req, res, next) {
+    var animalID = parseInt(req.params.id);
+    db.one('select * from animal where animalno = $1', animalID)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved one animal'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function createAnimal(req,res,next){
+    
+    db.none('insert into animal(animalno, name, type, bdate, inscriptiondate, state, clinic)' +
+            'values(${animalno}, ${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic})',
+            req.body)
+        .then(() => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: 'Quick and dirty, no integer parsing has been done yet'
                 });
         })
         .catch((err) => {
@@ -101,35 +132,35 @@ function updatePuppy(req, res, next) {
 function removePuppy(req, res, next) {
     var pupID = parseInt(req.params.id);
     db.result('delete from pups where id = $1', pupID)
-      .then((result) => {
-        /* jshint ignore:start */
-        res.status(200)
-          .json({
-            status: 'success',
-            message: `Removed ${result.rowCount} puppy`
-          });
-        /* jshint ignore:end */
-      })
-      .catch((err) => {
-        return next(err);
-      });
-  }
+        .then((result) => {
+            /* jshint ignore:start */
+            res.status(200)
+                .json({
+                    status: 'success',
+                    message: `Removed ${result.rowCount} puppy`
+                });
+            /* jshint ignore:end */
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
 
-  function testDummy(req, res, next) {
+function testDummy(req, res, next) {
     db.any('select * from dummytable')
-    .then((data) => {
-        res.status(200)
-            .json({
-                status: 'success',
-                data: data,
-                message: "Retrieved all puppies"
-            });
-    })
-    .catch((err) => {
-        return next(err);
-    });
-  }
-  
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: "Retrieved all puppies"
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 
 
 // add query functions
@@ -140,6 +171,8 @@ module.exports = {
     createPuppy: createPuppy,
     updatePuppy: updatePuppy,
     removePuppy: removePuppy,
-    testDummy:testDummy,
-    getAllAnimals:getAllAnimals,
+    testDummy: testDummy,
+    getAllAnimals: getAllAnimals,
+    getSingleAnimal: getSingleAnimal,
+    createAnimal: createAnimal,
 };
