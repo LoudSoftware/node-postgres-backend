@@ -42,3 +42,6 @@ Thumbs.db
 
 # Dotenv file
 .env
+
+# BFG-repo-cleaner
+bfg-1.13.0.jar
