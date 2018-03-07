@@ -10,7 +10,7 @@ require('dotenv').config();
 
 
 var connectionstring = process.env.DB_CONNECTION_STRING;
-console.log(connectionstring.slice(connectionstring.indexOf("@"),connectionstring.length)); 
+console.log(connectionstring.slice(connectionstring.indexOf("@"), connectionstring.length));
 // Just making sure to print only useful stuff to console
 
 var pgp = require('pg-promise')(options);
@@ -47,10 +47,9 @@ function getSingleAnimal(req, res, next) {
         });
 }
 
-function createAnimal(req,res,next){
-    db.none('insert into animal(animalno, name, type, bdate, inscriptiondate, state, clinic, ownerno)' +
-            'values(${animalno}, ${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic}, ${ownerno})',
-            req.body)
+function createAnimal(req, res, next) {
+    db.none('insert into animal(name, type, bdate, inscriptiondate, state, clinic, ownerno)' +
+            'values(${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic}, ${ownerno})', req.body)
         .then(() => {
             res.status(200)
                 .json({
@@ -63,58 +62,16 @@ function createAnimal(req,res,next){
         });
 }
 
-function getAllPuppies(req, res, next) {
-    db.any('select * from pups')
-        .then((data) => {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    data: data,
-                    message: "Retrieved all puppies"
-                });
-        })
-        .catch((err) => {
-            return next(err);
-        });
-}
-
-function getSinglePuppy(req, res, next) {
-    var pupID = parseInt(req.params.id);
-    db.one('select * from pups where id = $1', pupID)
-        .then((data) => {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    data: data,
-                    message: 'Retrieved one puppy'
-                });
-        })
-        .catch((err) => {
-            return next(err);
-        });
-}
-
-function createPuppy(req, res, next) {
-    req.body.age = parseInt(req.body.age);
-    db.none('insert into pups(name, breed, age, sex)' +
-            'values(${name}, ${breed}, ${age}, ${sex})',
-            req.body)
-        .then(() => {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    message: 'Inserted one puppy'
-                });
-        })
-        .catch((err) => {
-            return next(err);
-        });
-}
-
-
-function updatePuppy(req, res, next) {
-    db.none('update pups set name=$1, breed=$2, age=$3, sex=$4 where id=$5', [req.body.name, req.body.breed, parseInt(req.body.age),
-            req.body.sex, parseInt(req.params.id)
+function updateAnimal(req, res, next) {
+    db.none('update animal set name=$1, type=$2, bdate=$3, inscriptiondate=$4, state=$5, clinic=$6, ownerno=$7 where animalno=$8', [
+            req.body.name,
+            req.body.type,
+            req.body.bdate,
+            req.body.inscriptiondate,
+            req.body.state,
+            req.body.clinic,
+            req.body.ownerno,
+            req.params.id,
         ])
         .then(function () {
             res.status(200)
@@ -128,10 +85,9 @@ function updatePuppy(req, res, next) {
         });
 }
 
-
-function removePuppy(req, res, next) {
-    var pupID = parseInt(req.params.id);
-    db.result('delete from pups where id = $1', pupID)
+function removeAnimal(req, res, next){
+    var animalno = parseInt(req.params.id);
+    db.result('delete from pups where animalno = $1', pupID)
         .then((result) => {
             /* jshint ignore:start */
             res.status(200)
@@ -145,6 +101,7 @@ function removePuppy(req, res, next) {
             return next(err);
         });
 }
+
 
 function testDummy(req, res, next) {
     db.any('select * from dummytable')
@@ -166,13 +123,10 @@ function testDummy(req, res, next) {
 // add query functions
 
 module.exports = {
-    getAllPuppies: getAllPuppies,
-    getSinglePuppy: getSinglePuppy,
-    createPuppy: createPuppy,
-    updatePuppy: updatePuppy,
-    removePuppy: removePuppy,
     testDummy: testDummy,
     getAllAnimals: getAllAnimals,
     getSingleAnimal: getSingleAnimal,
     createAnimal: createAnimal,
+    updateAnimal: updateAnimal,
+    removeAnimal: removeAnimal,
 };
