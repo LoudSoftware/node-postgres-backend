@@ -10,13 +10,14 @@ require('dotenv').config();
 
 
 var connectionstring = process.env.DB_CONNECTION_STRING;
-console.log(connectionstring);
+console.log(connectionstring.slice(connectionstring.indexOf("@"),connectionstring.length)); 
+// Just making sure to print only useful stuff to console
 
 var pgp = require('pg-promise')(options);
 var db = pgp(connectionstring);
 
 function getAllAnimals(req, res, next) {
-    db.any('select * from animal, clinic')
+    db.any('select a.*, c.name as clinicname from animal a, clinic c')
         .then((data) => {
             res.status(200)
                 .json({
@@ -47,9 +48,8 @@ function getSingleAnimal(req, res, next) {
 }
 
 function createAnimal(req,res,next){
-    
-    db.none('insert into animal(animalno, name, type, bdate, inscriptiondate, state, clinic)' +
-            'values(${animalno}, ${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic})',
+    db.none('insert into animal(animalno, name, type, bdate, inscriptiondate, state, clinic, ownerno)' +
+            'values(${animalno}, ${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic}, ${ownerno})',
             req.body)
         .then(() => {
             res.status(200)
