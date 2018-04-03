@@ -10,7 +10,7 @@ require('dotenv').config();
 
 
 var connectionstring = process.env.DB_CONNECTION_STRING;
-console.log(connectionstring.slice(connectionstring.indexOf("@"), connectionstring.length));
+console.log('Connected to: ' + connectionstring);
 // Just making sure to print only useful stuff to console
 
 var pgp = require('pg-promise')(options);
