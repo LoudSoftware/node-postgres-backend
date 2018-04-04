@@ -78,6 +78,21 @@ function getExam(req, res, next) {
         });
 }
 
+function getAllTreatments(req, res, next) {
+    db.any('select t.* from treatment t')
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved treatments of an animal'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 function getTreatments(req, res, next) {
 	var animalID = parseInt(req.params.id);
     db.any('select a.name, t.description, t.cost, pt.qtity FROM treatment t, prescription p, prescriptedtreatment pt, animal a where p.animalno = $1 AND a.animalno = $1 AND pt.prescriptionno = p.pno AND t.tno = pt.treatmentno', animalID)
@@ -237,6 +252,7 @@ module.exports = {
 	getAllPersonnel:getAllPersonnel,
 	getAllPersonnelFromPosition: getAllPersonnelFromPosition,
 	
+	getAllTreatments: getAllTreatments,
 	getTreatments: getTreatments,
 	getExam: getExam,
 	
