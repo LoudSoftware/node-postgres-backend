@@ -22,4 +22,6 @@ router.get('/api/allpersonnel', db.getAllPersonnel);
 
 router.get('/api/allpersonnel/:id', db.getAllPersonnelFromPosition);
 
+router.get('/api/clinics', db.getAllClinics);
+
 module.exports = router;
