@@ -17,7 +17,7 @@ var pgp = require('pg-promise')(options);
 var db = pgp(connectionstring);
 
 function getAllAnimals(req, res, next) {
-    db.any('select a.*, c.name as clinicname from animal a, clinic c')
+    db.any('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno')
         .then((data) => {
             res.status(200)
                 .json({
@@ -31,9 +31,72 @@ function getAllAnimals(req, res, next) {
         });
 }
 
+function getAllPersonnel(req, res, next) {
+    db.any('select p.*, c.clinicname as clinicname from personnel p, clinic c where p.clinicno = c.clinicno')
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL personnel'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function getAllPersonnelFromPosition(req, res, next) {
+	var vet = req.params.id;
+    db.any('select p.*, c.clinicname as clinicname from personnel p, clinic c where p.clinicno = c.clinicno AND p.personnelposition = $1', vet)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved ALL peops of this position'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function getExam(req, res, next) {
+	var animalID = parseInt(req.params.id);
+    db.any('select a.name, e.examdate, e.hour, e.description, v.firstname, v.lastname, t.cost from prescription p, examination e, personnel v, animal a, treatment t where t.tno = 1 AND p.animalno = $1 AND a.animalno = $1 AND p.examno = e.eno AND v.personnelno = e.vetno', animalID)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved examination of an animal'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function getTreatments(req, res, next) {
+	var animalID = parseInt(req.params.id);
+    db.any('select a.name, t.description, t.cost, pt.qtity FROM treatment t, prescription p, prescriptedtreatment pt, animal a where p.animalno = $1 AND a.animalno = $1 AND pt.prescriptionno = p.pno AND t.tno = pt.treatmentno', animalID)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved treatments of an animal'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 function getSingleAnimal(req, res, next) {
     var animalID = parseInt(req.params.id);
-    db.one('select * from animal where animalno = $1', animalID)
+    db.one('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno AND animalno = $1', animalID)
         .then((data) => {
             res.status(200)
                 .json({
@@ -47,9 +110,40 @@ function getSingleAnimal(req, res, next) {
         });
 }
 
+function getAllOwners(req, res, next) {
+    db.any('select o.* from owner o')
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved all owners'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
+function getOwner(req, res, next) {
+    var ownerId = parseInt(req.params.id);
+    db.one('select o.* from owner o where o.ownerno = $1', ownerId)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved one owner'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 function createAnimal(req, res, next) {
-    db.none('insert into animal(name, type, bdate, inscriptiondate, state, clinic, ownerno)' +
-            'values(${name}, ${type}, ${bdate}, ${inscriptiondate}, ${state}, ${clinic}, ${ownerno})', req.body)
+    db.none('insert into animal(name, bdate, inscriptiondate, clinicno, ownerno, animaltype, description, isalive)' +
+            'values(${name}, ${bdate}, ${inscriptiondate}, ${clinicno}, ${ownerno}, ${animaltype}, ${description}, ${isalive})', req.body)
         .then(() => {
             res.status(200)
                 .json({
@@ -63,14 +157,15 @@ function createAnimal(req, res, next) {
 }
 
 function updateAnimal(req, res, next) {
-    db.none('update animal set name=$1, type=$2, bdate=$3, inscriptiondate=$4, state=$5, clinic=$6, ownerno=$7 where animalno=$8', [
+    db.none('update animal set name=$1, bdate=$2, inscriptiondate=$3, clinicno=$4, ownerno=$5, animaltype=$6, description=$7, isalive=$8 where animalno=$9', [
             req.body.name,
-            req.body.type,
             req.body.bdate,
             req.body.inscriptiondate,
-            req.body.state,
-            req.body.clinic,
+            req.body.clinicno,
             req.body.ownerno,
+            req.body.animaltype,
+            req.body.description,
+			req.body.isalive,
             req.params.id,
         ])
         .then(function () {
@@ -102,7 +197,6 @@ function removeAnimal(req, res, next){
         });
 }
 
-
 function testDummy(req, res, next) {
     db.any('select * from dummytable')
         .then((data) => {
@@ -125,7 +219,16 @@ function testDummy(req, res, next) {
 module.exports = {
     testDummy: testDummy,
     getAllAnimals: getAllAnimals,
+	getAllPersonnel:getAllPersonnel,
+	getAllPersonnelFromPosition: getAllPersonnelFromPosition,
+	
+	getTreatments: getTreatments,
+	getExam: getExam,
+	
+	getAllOwners: getAllOwners,
     getSingleAnimal: getSingleAnimal,
+	getOwner: getOwner,
+	
     createAnimal: createAnimal,
     updateAnimal: updateAnimal,
     removeAnimal: removeAnimal,

@@ -11,5 +11,15 @@ router.post('/api/animal/', db.createAnimal);
 router.put('/api/animal/:id', db.updateAnimal);
 router.delete('/api/animal/:id', db.removeAnimal);
 
+router.get('/api/owner', db.getAllOwners);
+router.get('/api/owner/:id', db.getOwner);
+
+router.get('/api/examination/:id', db.getExam);
+
+router.get('/api/treatments/:id', db.getTreatments);
+
+router.get('/api/allpersonnel', db.getAllPersonnel);
+
+router.get('/api/allpersonnel/:id', db.getAllPersonnelFromPosition);
 
 module.exports = router;
