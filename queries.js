@@ -187,6 +187,21 @@ function getAllClinics(req, res, next) {
         });
 }
 
+function getAnimalTypes(req, res, next) {
+    db.any('select t.* from animal_type t')
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved all animal types'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 function createAnimal(req, res, next) {
     db.none('insert into animal(name, bdate, inscriptiondate, clinicno, ownerno, animaltype, description, isalive)' +
             'values(${name}, ${bdate}, ${inscriptiondate}, ${clinicno}, ${ownerno}, ${animaltype}, ${description}, ${isalive})', req.body)
@@ -256,6 +271,8 @@ module.exports = {
 	getAllOwners: getAllOwners,
     getSingleAnimal: getSingleAnimal,
 	getOwner: getOwner,
+	
+	getAnimalTypes: getAnimalTypes,
 	
 	getAnimalsFromOwner: getAnimalsFromOwner,
 	

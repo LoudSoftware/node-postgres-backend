@@ -26,4 +26,6 @@ router.get('/api/clinics', db.getAllClinics);
 
 router.get('/api/treatments', db.getAllTreatments);
 
+router.get('/api/animaltypes', db.getAnimalTypes);
+
 module.exports = router;
