@@ -214,13 +214,11 @@ function removeAnimal(req, res, next){
     var animalno = parseInt(req.params.id);
     db.result('delete from animal where animalno = $1', animalno)
         .then((result) => {
-            /* jshint ignore:start */
             res.status(200)
                 .json({
                     status: 'success',
-                    message: `Removed ${result.rowCount} puppy`
+                    message: 'Removed animal'
                 });
-            /* jshint ignore:end */
         })
         .catch((err) => {
             return next(err);
