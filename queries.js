@@ -202,7 +202,7 @@ function updateAnimal(req, res, next) {
             res.status(200)
                 .json({
                     status: 'success',
-                    message: 'Updated puppy'
+                    message: 'Updated animal'
                 });
         })
         .catch(function (err) {
