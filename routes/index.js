@@ -12,6 +12,8 @@ router.delete('/api/animal/:id', db.removeAnimal);
 router.get('/api/owner', db.getAllOwners);
 router.get('/api/owner/:id', db.getOwner);
 
+router.get('/api/owneranimals/:id', db.getAnimalsFromOwner);
+
 router.get('/api/examination/:id', db.getExam);
 
 router.get('/api/treatment/:id', db.getTreatments);

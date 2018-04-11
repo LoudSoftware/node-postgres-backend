@@ -125,6 +125,22 @@ function getSingleAnimal(req, res, next) {
         });
 }
 
+function getAnimalsFromOwner(req, res, next) {
+    var ownerID = parseInt(req.params.id);
+    db.any('select a.*, o.firstname, o.lastname, at.typename from animal a, owner o, animal_type at where o.ownerno = a.ownerno AND o.ownerno = $1 AND a.animaltype = at.typeno', ownerID)
+        .then((data) => {
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'Retrieved all animals from owner'
+                });
+        })
+        .catch((err) => {
+            return next(err);
+        });
+}
+
 function getAllOwners(req, res, next) {
     db.any('select o.* from owner o')
         .then((data) => {
@@ -242,6 +258,8 @@ module.exports = {
 	getAllOwners: getAllOwners,
     getSingleAnimal: getSingleAnimal,
 	getOwner: getOwner,
+	
+	getAnimalsFromOwner: getAnimalsFromOwner,
 	
 	getAllClinics: getAllClinics,
 	
