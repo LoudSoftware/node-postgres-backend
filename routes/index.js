@@ -3,8 +3,6 @@ var router = express.Router();
 
 var db = require('../queries');
 
-router.get('/api/dummytest', db.testDummy);
-
 router.get('/api/animal', db.getAllAnimals);
 router.get('/api/animal/:id', db.getSingleAnimal);
 router.post('/api/animal/', db.createAnimal);

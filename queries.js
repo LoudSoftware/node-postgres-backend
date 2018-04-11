@@ -212,7 +212,7 @@ function updateAnimal(req, res, next) {
 
 function removeAnimal(req, res, next){
     var animalno = parseInt(req.params.id);
-    db.result('delete from pups where animalno = $1', pupID)
+    db.result('delete from animal where animalno = $1', animalno)
         .then((result) => {
             /* jshint ignore:start */
             res.status(200)
@@ -227,27 +227,10 @@ function removeAnimal(req, res, next){
         });
 }
 
-function testDummy(req, res, next) {
-    db.any('select * from dummytable')
-        .then((data) => {
-            res.status(200)
-                .json({
-                    status: 'success',
-                    data: data,
-                    message: "Retrieved all puppies"
-                });
-        })
-        .catch((err) => {
-            return next(err);
-        });
-}
-
-
 
 // add query functions
 
 module.exports = {
-    testDummy: testDummy,
     getAllAnimals: getAllAnimals,
 	getAllPersonnel:getAllPersonnel,
 	getAllPersonnelFromPosition: getAllPersonnelFromPosition,
