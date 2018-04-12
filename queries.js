@@ -9,12 +9,13 @@ var options = {
 require('dotenv').config();
 
 
-var connectionstring = process.env.DB_CONNECTION_STRING;
+// var connectionstring = process.env.DB_CONNECTION_STRING;
+var connectionstring = process.env.DATABASE_URL;
 console.log('Connected to: ' + connectionstring);
 // Just making sure to print only useful stuff to console
 
 var pgp = require('pg-promise')(options);
-var db = pgp(connectionstring);
+var db = pgp(connectionstring,ssl=true);
 
 function getAllAnimals(req, res, next) {
     db.any('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno ORDER BY a.ownerno')
