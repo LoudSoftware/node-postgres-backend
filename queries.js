@@ -17,7 +17,7 @@ var pgp = require('pg-promise')(options);
 var db = pgp(connectionstring);
 
 function getAllAnimals(req, res, next) {
-    db.any('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno ORDER BY c.clinicname')
+    db.any('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno ORDER BY a.ownerno')
         .then((data) => {
             res.status(200)
                 .json({
