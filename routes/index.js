@@ -5,6 +5,7 @@ var db = require('../queries');
 
 router.get('/api/animal', db.getAllAnimals);
 router.get('/api/animal/:id', db.getSingleAnimal);
+router.get('/api/animal/byname/:name', db.getAnimalByName);
 router.post('/api/animal/', db.createAnimal);
 router.put('/api/animal/:id', db.updateAnimal);
 router.delete('/api/animal/:id', db.removeAnimal);

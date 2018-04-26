@@ -15,7 +15,7 @@ console.log('Connected to: ' + connectionstring);
 // Just making sure to print only useful stuff to console
 
 var pgp = require('pg-promise')(options);
-var db = pgp(connectionstring,ssl=true);
+var db = pgp(connectionstring, ssl = true);
 
 function getAllAnimals(req, res, next) {
     db.any('select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno ORDER BY a.ownerno')
@@ -48,7 +48,7 @@ function getAllPersonnel(req, res, next) {
 }
 
 function getAllPersonnelFromPosition(req, res, next) {
-	var vet = req.params.id;
+    var vet = req.params.id;
     db.any('select p.*, c.clinicname as clinicname from personnel p, clinic c where p.clinicno = c.clinicno AND p.personnelposition = $1', vet)
         .then((data) => {
             res.status(200)
@@ -64,7 +64,7 @@ function getAllPersonnelFromPosition(req, res, next) {
 }
 
 function getExam(req, res, next) {
-	var animalID = parseInt(req.params.id);
+    var animalID = parseInt(req.params.id);
     db.any('select a.name, e.examdate, e.hour, e.description, v.firstname, v.lastname, t.cost from prescription p, examination e, personnel v, animal a, treatment t where t.tno = 1 AND p.animalno = $1 AND a.animalno = $1 AND p.examno = e.eno AND v.personnelno = e.vetno', animalID)
         .then((data) => {
             res.status(200)
@@ -95,7 +95,7 @@ function getAllTreatments(req, res, next) {
 }
 
 function getTreatments(req, res, next) {
-	var animalID = parseInt(req.params.id);
+    var animalID = parseInt(req.params.id);
     db.any('select a.name, t.description, t.cost, pt.qtity FROM treatment t, prescription p, prescriptedtreatment pt, animal a where p.animalno = $1 AND a.animalno = $1 AND pt.prescriptionno = p.pno AND t.tno = pt.treatmentno', animalID)
         .then((data) => {
             res.status(200)
@@ -124,6 +124,30 @@ function getSingleAnimal(req, res, next) {
         .catch((err) => {
             return next(err);
         });
+}
+
+function getAnimalByName(req, res, next) {
+    var animalName = req.params.name;
+    db.one(`select a.*, c.clinicname, o.firstname, o.lastname, at.typename from animal a, clinic c, animal_type at, owner o where a.clinicno = c.clinicno AND at.typeno = a.animaltype AND o.ownerno = a.ownerno AND a.name ilike '%${animalName}%'`)
+        .then((data) => {
+
+
+            res.status(200)
+                .json({
+                    status: 'success',
+                    data: data,
+                    message: 'retrieved animal by name'
+                })
+        },
+            err => {
+                res.status(404)
+                    .json({
+                        status: 'not found',
+                        message: err['message']
+                    })
+            });
+
+
 }
 
 function getAnimalsFromOwner(req, res, next) {
@@ -205,7 +229,7 @@ function getAnimalTypes(req, res, next) {
 
 function createAnimal(req, res, next) {
     db.none('insert into animal(name, bdate, inscriptiondate, clinicno, ownerno, animaltype, description, isalive)' +
-            'values(${name}, ${bdate}, ${inscriptiondate}, ${clinicno}, ${ownerno}, ${animaltype}, ${description}, ${isalive})', req.body)
+        'values(${name}, ${bdate}, ${inscriptiondate}, ${clinicno}, ${ownerno}, ${animaltype}, ${description}, ${isalive})', req.body)
         .then(() => {
             res.status(200)
                 .json({
@@ -220,16 +244,16 @@ function createAnimal(req, res, next) {
 
 function updateAnimal(req, res, next) {
     db.none('update animal set name=$1, bdate=$2, inscriptiondate=$3, clinicno=$4, ownerno=$5, animaltype=$6, description=$7, isalive=$8 where animalno=$9', [
-            req.body.name,
-            req.body.bdate,
-            req.body.inscriptiondate,
-            req.body.clinicno,
-            req.body.ownerno,
-            req.body.animaltype,
-            req.body.description,
-			req.body.isalive,
-            req.params.id,
-        ])
+        req.body.name,
+        req.body.bdate,
+        req.body.inscriptiondate,
+        req.body.clinicno,
+        req.body.ownerno,
+        req.body.animaltype,
+        req.body.description,
+        req.body.isalive,
+        req.params.id,
+    ])
         .then(function () {
             res.status(200)
                 .json({
@@ -242,7 +266,7 @@ function updateAnimal(req, res, next) {
         });
 }
 
-function removeAnimal(req, res, next){
+function removeAnimal(req, res, next) {
     var animalno = parseInt(req.params.id);
     db.result('delete from animal where animalno = $1', animalno)
         .then((result) => {
@@ -262,23 +286,24 @@ function removeAnimal(req, res, next){
 
 module.exports = {
     getAllAnimals: getAllAnimals,
-	getAllPersonnel:getAllPersonnel,
-	getAllPersonnelFromPosition: getAllPersonnelFromPosition,
-	
-	getAllTreatments: getAllTreatments,
-	getTreatments: getTreatments,
-	getExam: getExam,
-	
-	getAllOwners: getAllOwners,
+    getAllPersonnel: getAllPersonnel,
+    getAllPersonnelFromPosition: getAllPersonnelFromPosition,
+
+    getAllTreatments: getAllTreatments,
+    getTreatments: getTreatments,
+    getExam: getExam,
+
+    getAllOwners: getAllOwners,
     getSingleAnimal: getSingleAnimal,
-	getOwner: getOwner,
-	
-	getAnimalTypes: getAnimalTypes,
-	
-	getAnimalsFromOwner: getAnimalsFromOwner,
-	
-	getAllClinics: getAllClinics,
-	
+    getAnimalByName: getAnimalByName,
+    getOwner: getOwner,
+
+    getAnimalTypes: getAnimalTypes,
+
+    getAnimalsFromOwner: getAnimalsFromOwner,
+
+    getAllClinics: getAllClinics,
+
     createAnimal: createAnimal,
     updateAnimal: updateAnimal,
     removeAnimal: removeAnimal,
